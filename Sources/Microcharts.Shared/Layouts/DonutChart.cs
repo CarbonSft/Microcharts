@@ -11,7 +11,7 @@ namespace Microcharts
     /// <summary>
     /// ![chart](../images/Donut.png)
     /// 
-    /// A donut chart.
+    /// A donut chart. Supports only one series of data so far.
     /// </summary>
     public class DonutChart : Chart
     {
@@ -29,21 +29,21 @@ namespace Microcharts
 
         public override void DrawContent(SKCanvas canvas, int width, int height)
         {
-            this.DrawCaption(canvas, width, height);
+            DrawCaption(canvas, width, height);
             using (new SKAutoCanvasRestore(canvas))
             {
                 canvas.Translate(width / 2, height / 2);
-                var sumValue = this.Entries.Sum(x => Math.Abs(x.Value));
+                var sumValue = Series.First().Sum(x => Math.Abs(x.Value));
                 var radius = (Math.Min(width, height) - (2 * Margin)) / 2;
 
                 var start = 0.0f;
-                for (int i = 0; i < this.Entries.Count(); i++)
+                for (int i = 0; i < Series.Count(); i++)
                 {
-                    var entry = this.Entries.ElementAt(i);
+                    var entry = Series.First().ElementAt(i);
                     var end = start + (Math.Abs(entry.Value) / sumValue);
 
                     // Sector
-                    var path = RadialHelpers.CreateSectorPath(start, end, radius, radius * this.HoleRadius);
+                    var path = RadialHelpers.CreateSectorPath(start, end, radius, radius * HoleRadius);
                     using (var paint = new SKPaint
                     {
                         Style = SKPaintStyle.Fill,
@@ -61,31 +61,31 @@ namespace Microcharts
 
         private void DrawCaption(SKCanvas canvas, int width, int height)
         {
-            var sumValue = this.Entries.Sum(x => Math.Abs(x.Value));
+            var sumValue = Series.First().Sum(x => Math.Abs(x.Value));
             var rightValues = new List<Entry>();
             var leftValues = new List<Entry>();
 
             int i = 0;
             var current = 0.0f;
-            while (i < this.Entries.Count() && (current < sumValue / 2))
+            while (i < Series.First().Count() && (current < sumValue / 2))
             {
-                var entry = this.Entries.ElementAt(i);
+                var entry = Series.First().ElementAt(i);
                 rightValues.Add(entry);
                 current += Math.Abs(entry.Value);
                 i++;
             }
 
-            while (i < this.Entries.Count())
+            while (i < Series.First().Count())
             {
-                var entry = this.Entries.ElementAt(i);
+                var entry = Series.First().ElementAt(i);
                 leftValues.Add(entry);
                 i++;
             }
 
             leftValues.Reverse();
 
-            this.DrawCaptionElements(canvas, width, height, rightValues, false);
-            this.DrawCaptionElements(canvas, width, height, leftValues, true);
+            DrawCaptionElements(canvas, width, height, rightValues, false);
+            DrawCaptionElements(canvas, width, height, leftValues, true);
         }
 
         #endregion

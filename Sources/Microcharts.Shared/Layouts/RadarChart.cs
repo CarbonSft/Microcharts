@@ -10,7 +10,7 @@ namespace Microcharts
     /// <summary>
     /// ![chart](../images/Radar.png)
     /// 
-    /// A radar chart.
+    /// A radar chart. Supports only one series of data so far.
     /// </summary>
     public class RadarChart : Chart
     {
@@ -36,11 +36,11 @@ namespace Microcharts
 
         public float PointSize { get; set; } = 14;
 
-        private float AbsoluteMinimum => this.Entries.Select(x => x.Value).Concat(new[] { this.MaxValue, this.MinValue, this.InternalMinValue ?? 0 }).Min(x => Math.Abs(x));
+        private float AbsoluteMinimum => Series.First().Select(x => x.Value).Concat(new[] { MaxValue, MinValue, InternalMinValue ?? 0 }).Min(x => Math.Abs(x));
 
-        private float AbsoluteMaximum => this.Entries.Select(x => x.Value).Concat(new[] { this.MaxValue, this.MinValue, this.InternalMinValue ?? 0 }).Max(x => Math.Abs(x));
+        private float AbsoluteMaximum => Series.First().Select(x => x.Value).Concat(new[] { MaxValue, MinValue, InternalMinValue ?? 0 }).Max(x => Math.Abs(x));
 
-        private float ValueRange => this.AbsoluteMaximum - this.AbsoluteMinimum;
+        private float ValueRange => AbsoluteMaximum - AbsoluteMinimum;
 
         #endregion
 
@@ -48,11 +48,11 @@ namespace Microcharts
 
         public override void DrawContent(SKCanvas canvas, int width, int height)
         {
-            var total = this.Entries.Count();
+            var total = Series.Count();
 
             if (total > 0)
             {
-                var captionHeight = this.Entries.Max(x =>
+                var captionHeight = Series.First().Max(x =>
                 {
                     var result = 0.0f;
 
@@ -61,17 +61,17 @@ namespace Microcharts
                     if (hasLabel || hasValueLabel)
                     {
                         var hasOffset = hasLabel && hasValueLabel;
-                        var captionMargin = this.LabelTextSize * 0.60f;
+                        var captionMargin = LabelTextSize * 0.60f;
                         var space = hasOffset ? captionMargin : 0;
 
                         if (hasLabel)
                         {
-                            result += this.LabelTextSize;
+                            result += LabelTextSize;
                         }
 
                         if (hasValueLabel)
                         {
-                            result += this.LabelTextSize;
+                            result += LabelTextSize;
                         }
                     }
 
@@ -83,11 +83,11 @@ namespace Microcharts
                 var rangeAngle = (float)((Math.PI * 2) / total);
                 var startAngle = (float)Math.PI;
 
-                var nextEntry = this.Entries.First();
+                var nextEntry = Series.First().First();
                 var nextAngle = startAngle;
-                var nextPoint = this.GetPoint(nextEntry.Value, center, nextAngle, radius);
+                var nextPoint = GetPoint(nextEntry.Value, center, nextAngle, radius);
 
-                this.DrawBorder(canvas, center, radius);
+                DrawBorder(canvas, center, radius);
 
                 for (int i = 0; i < total; i++)
                 {
@@ -97,19 +97,19 @@ namespace Microcharts
 
                     var nextIndex = (i + 1) % total;
                     nextAngle = startAngle + (rangeAngle * nextIndex);
-                    nextEntry = this.Entries.ElementAt(nextIndex);
-                    nextPoint = this.GetPoint(nextEntry.Value, center, nextAngle, radius);
+                    nextEntry = Series.First().ElementAt(nextIndex);
+                    nextPoint = GetPoint(nextEntry.Value, center, nextAngle, radius);
 
                     // Border center bars
                     using (var paint = new SKPaint()
                     {
                         Style = SKPaintStyle.Stroke,
-                        StrokeWidth = this.BorderLineSize,
-                        Color = this.BorderLineColor,
+                        StrokeWidth = BorderLineSize,
+                        Color = BorderLineColor,
                         IsAntialias = true,
                     })
                     {
-                        var borderPoint = this.GetPoint(this.MaxValue, center, angle, radius);
+                        var borderPoint = GetPoint(MaxValue, center, angle, radius);
                         canvas.DrawLine(point.X, point.Y, borderPoint.X, borderPoint.Y, paint);
                     }
 
@@ -117,22 +117,23 @@ namespace Microcharts
                     using (var paint = new SKPaint()
                     {
                         Style = SKPaintStyle.Stroke,
-                        StrokeWidth = this.BorderLineSize,
+                        StrokeWidth = BorderLineSize,
                         Color = entry.Color.WithAlpha((byte)(entry.Color.Alpha * 0.75f)),
-                        PathEffect = SKPathEffect.CreateDash(new[] { this.BorderLineSize, this.BorderLineSize * 2 }, 0),
+                        PathEffect = SKPathEffect.CreateDash(new[] { BorderLineSize, BorderLineSize * 2 }, 0),
                         IsAntialias = true,
                     })
                     {
-                        var amount = Math.Abs(entry.Value - this.AbsoluteMinimum) / this.ValueRange;
+                        var amount = Math.Abs(entry.Value - AbsoluteMinimum) / ValueRange;
                         canvas.DrawCircle(center.X, center.Y, radius * amount, paint);
                     }
 
-                    canvas.DrawGradientLine(center, entry.Color.WithAlpha(0), point, entry.Color.WithAlpha((byte)(entry.Color.Alpha * 0.75f)), this.LineSize);
-                    canvas.DrawGradientLine(point, entry.Color, nextPoint, nextEntry.Color, this.LineSize);
-                    canvas.DrawPoint(point, entry.Color, this.PointSize, this.PointMode);
+                    canvas.DrawGradientLine(center, entry.Color.WithAlpha(0), point,
+                        entry.Color.WithAlpha((byte) (entry.Color.Alpha * 0.75f)), LineSize);
+                    canvas.DrawGradientLine(point, entry.Color, nextPoint, nextEntry.Color, LineSize);
+                    canvas.DrawPoint(point, entry.Color, PointSize, PointMode);
 
                     // Labels
-                    var labelPoint = this.GetPoint(this.MaxValue, center, angle, radius + this.LabelTextSize  + (this.PointSize / 2));
+                    var labelPoint = GetPoint(MaxValue, center, angle, radius + LabelTextSize  + (PointSize / 2));
                     var alignment = SKTextAlign.Left;
 
                     if ((Math.Abs(angle - (startAngle + Math.PI)) < Epsilon) || (Math.Abs(angle - Math.PI) < Epsilon))
@@ -144,7 +145,8 @@ namespace Microcharts
                         alignment = SKTextAlign.Right;
                     }
 
-                    canvas.DrawCaptionLabels(entry.Label, entry.TextColor, entry.ValueLabel, entry.Color, this.LabelTextSize, labelPoint, alignment);
+                    canvas.DrawCaptionLabels(entry.Label, entry.TextColor, entry.ValueLabel, entry.Color, LabelTextSize,
+                        labelPoint, alignment);
                 }
             }
         }
@@ -159,7 +161,7 @@ namespace Microcharts
         /// <param name="radius">The radius.</param>
         private SKPoint GetPoint(float value, SKPoint center, float angle, float radius)
         {
-            var amount = Math.Abs(value - this.AbsoluteMinimum) / this.ValueRange;
+            var amount = Math.Abs(value - AbsoluteMinimum) / ValueRange;
             var point = new SKPoint(0, radius * amount);
             var rotation = SKMatrix.MakeRotation(angle);
             return center + rotation.MapPoint(point);
@@ -170,8 +172,8 @@ namespace Microcharts
             using (var paint = new SKPaint()
             {
                 Style = SKPaintStyle.Stroke,
-                StrokeWidth = this.BorderLineSize,
-                Color = this.BorderLineColor,
+                StrokeWidth = BorderLineSize,
+                Color = BorderLineColor,
                 IsAntialias = true,
             })
             {

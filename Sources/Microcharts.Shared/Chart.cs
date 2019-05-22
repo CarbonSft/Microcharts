@@ -34,7 +34,7 @@ namespace Microcharts
         /// Gets or sets the data entries.
         /// </summary>
         /// <value>The entries.</value>
-        public IEnumerable<IEnumerable<Entry>> Entries { get; set; }
+        public IEnumerable<IEnumerable<Entry>> Series { get; set; }
 
         /// <summary>
         /// Gets or sets the minimum value from entries. If not defined, it will be the minimum between zero and the 
@@ -45,17 +45,17 @@ namespace Microcharts
         {
             get
             {
-                if (!Entries.Any())
+                if (!Series.Any())
                 {
                     return 0;
                 } 
 
                 if (InternalMinValue == null)
                 {
-                    return Math.Min(0, Entries.Min(x => x.Min(y => y.Value)));
+                    return Math.Min(0, Series.Min(x => x.Min(y => y.Value)));
                 }
 
-                return Math.Min(InternalMinValue.Value, Entries.Min(x => x.Min(y => y.Value)));
+                return Math.Min(InternalMinValue.Value, Series.Min(x => x.Min(y => y.Value)));
             }
 
             set => InternalMinValue = value;
@@ -70,17 +70,17 @@ namespace Microcharts
         {
             get
             {
-                if (!this.Entries.Any()) 
+                if (!this.Series.Any()) 
                 {
                     return 0;
                 } 
 
                 if (this.InternalMaxValue == null)
                 {
-                    return Math.Max(0, this.Entries.Max(x => x.Max(y => y.Value)));
+                    return Math.Max(0, this.Series.Max(x => x.Max(y => y.Value)));
                 }
 
-                return Math.Max(InternalMaxValue.Value, this.Entries.Max(x => x.Max(y => y.Value)));
+                return Math.Max(InternalMaxValue.Value, this.Series.Max(x => x.Max(y => y.Value)));
             }
 
             set => this.InternalMaxValue = value;

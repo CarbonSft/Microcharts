@@ -44,22 +44,14 @@ namespace Microcharts
         /// <value>The line area alpha.</value>
         public byte LineAreaAlpha { get; set; } = 32;
 
-        /// <summary>
-        /// Returns points of chart
-        /// </summary>
-        public SKPoint[] Points { get; private set; }
-
-        public SKPoint SelectedPoint { get; set; } = SKPoint.Empty;
-
         #endregion
 
         #region Methods
 
         public override void DrawContent(SKCanvas canvas, int width, int height)
         {
-
-
-            foreach (var serie in Entries)
+            Points = new List<SKPoint>();
+            foreach (var serie in Series)
             {
                 var entries = serie as Entry[] ?? serie.ToArray();
                 var valueLabelSizes = MeasureValueLabels(entries);
@@ -68,13 +60,15 @@ namespace Microcharts
                 var itemSize = CalculateItemSize(entries, width, height, footerHeight, headerHeight);
                 var origin = CalculateYOrigin(itemSize.Height, headerHeight);
 
-                Points = CalculatePoints(itemSize, origin, headerHeight, entries);
+                var points = CalculatePoints(itemSize, origin, headerHeight, entries);
 
-                DrawArea(entries, canvas, Points, itemSize, origin);
-                DrawLine(entries, canvas, Points, itemSize);
-                DrawPoints(entries, canvas, Points, SelectedPoint);
-                DrawFooter(entries, canvas, Points, itemSize, height, footerHeight);
-                DrawValueLabel(entries, canvas, Points, itemSize, height, valueLabelSizes);
+                DrawArea(entries, canvas, points, itemSize, origin);
+                DrawLine(entries, canvas, points, itemSize);
+                DrawPoints(entries, canvas, points, SelectedPoint);
+                DrawFooter(entries, canvas, points, itemSize, height, footerHeight);
+                DrawValueLabel(entries, canvas, points, itemSize, height, valueLabelSizes);
+
+                Points = Points.Concat(points.ToArray());
             }
 
         }

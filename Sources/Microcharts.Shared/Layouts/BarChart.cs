@@ -44,7 +44,7 @@ namespace Microcharts
         /// <param name="height">The height of the chart.</param>
         public override void DrawContent(SKCanvas canvas, int width, int height)
         {
-            foreach (var serie in Entries)
+            foreach (var serie in Series)
             {
                 var entries = serie as Entry[] ?? serie.ToArray();
                 var valueLabelSizes = MeasureValueLabels(entries);
@@ -73,7 +73,7 @@ namespace Microcharts
         protected void DrawBars(SKCanvas canvas, SKPoint[] points, SKSize itemSize, float origin, float headerHeight)
         {
             const float minBarHeight = 4;
-            foreach (var serie in Entries)
+            foreach (var serie in Series)
             {                
                 var entries = serie as Entry[] ?? serie.ToArray();
                 if (points.Length > 0)
@@ -118,7 +118,7 @@ namespace Microcharts
         /// <param name="headerHeight">The header height.</param>
         protected void DrawBarAreas(SKCanvas canvas, SKPoint[] points, SKSize itemSize, float headerHeight)
         {
-            foreach (var serie in Entries)
+            foreach (var serie in Series)
             {
                 var entries = serie as Entry[] ?? serie.ToArray();
                 if (points.Length > 0 && PointAreaAlpha > 0)

@@ -15,28 +15,14 @@ namespace Microcharts.Forms
 		{
 			BackgroundColor = Color.Transparent;
 			PaintSurface += OnPaintCanvas;
-            Touch += OnTouch;
-
-        }
-
-        private void OnTouch(object sender, SKTouchEventArgs e)
-        {
-            
         }
 
         protected override void OnTouch(SKTouchEventArgs e)
         {
             base.OnTouch(e);
-            var loc = e.Location;
-            var elements = GetChildElements(loc.ToFormsPoint());
-            //Chart.Entries.First().First().
-            //elements[0].
-            var lineChart = (LineChart) Chart;
-            var point = lineChart.Points.First(x =>
-                SKPoint.Distance(x, loc) == lineChart.Points.Min(y => SKPoint.Distance(y, loc)));
-            lineChart.SelectedPoint = point;
-            this.InvalidateSurface();
-
+            var lineChart = (PointChart) Chart;
+            lineChart.SelectNearestPoint(e.Location);
+            InvalidateSurface();
         }
 
         public static readonly BindableProperty ChartProperty = BindableProperty.Create(

@@ -19,9 +19,16 @@ namespace Microcharts
 
         public float PointSize { get; set; } = 14;
 
+        public SKPoint SelectedPoint { get; set; } = SKPoint.Empty;
+
         public PointMode PointMode { get; set; } = PointMode.Circle;
 
         public byte PointAreaAlpha { get; set; } = 100;
+
+        /// <summary>
+        /// Returns points of chart
+        /// </summary>
+        public IEnumerable<SKPoint> Points { get; protected set; }
 
         private float ValueRange => MaxValue - MinValue;
 
@@ -46,7 +53,8 @@ namespace Microcharts
 
         public override void DrawContent(SKCanvas canvas, int width, int height)
         {
-            foreach (var serie in Entries)
+            Points = new List<SKPoint>();
+            foreach (var serie in Series)
             {
                 var entries = serie as Entry[] ?? serie.ToArray();
                 var valueLabelSizes = MeasureValueLabels(entries);
@@ -60,8 +68,17 @@ namespace Microcharts
                 DrawPoints(entries, canvas, points, SKPoint.Empty);
                 DrawFooter(entries, canvas, points, itemSize, height, footerHeight);
                 DrawValueLabel(entries, canvas, points, itemSize, height, valueLabelSizes);
+
+                Points = Points.Concat(points.ToArray());
             }
 
+        }
+
+        public void SelectNearestPoint(SKPoint tapLocation)
+        {
+            var point = Points.First(x =>
+                SKPoint.Distance(x, tapLocation) == Points.Min(y => SKPoint.Distance(y, tapLocation)));
+            SelectedPoint = point;
         }
 
         protected SKSize CalculateItemSize(IEnumerable<Entry> serie, int width, int height, float footerHeight, float headerHeight)
@@ -206,7 +223,7 @@ namespace Microcharts
         {
             var result = Margin;
 
-            if (Entries.Any())
+            if (Series.Any())
             {
                 var maxValueWidth = valueLabelSizes.Max(x => x.Width);
                 if (maxValueWidth > 0)

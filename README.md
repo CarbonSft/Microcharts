@@ -226,3 +226,6 @@ If you want to contribute code please file an issue and create a branch off of t
 ## License
 
 MIT © [Aloïs Deniel](http://aloisdeniel.github.io)
+
+If you like my content, please consider buying me a coffee. Thank you for your support!
+* [![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/JALQwKaqH)

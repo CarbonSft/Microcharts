@@ -19,11 +19,15 @@ namespace Microcharts
 
         public float PointSize { get; set; } = 14;
 
+        public float SelectedPointSize { get; set; } = 28;
+
         public SKPoint SelectedPoint { get; set; } = SKPoint.Empty;
 
         public PointMode PointMode { get; set; } = PointMode.Circle;
 
         public byte PointAreaAlpha { get; set; } = 100;
+
+        public bool ValueLabelRotation { get; set; } = true;
 
         /// <summary>
         /// Returns points of chart
@@ -161,9 +165,9 @@ namespace Microcharts
                     var entry = entries.ElementAt(i);
                     var point = points[i];
                     var size = PointSize;
-                    if (SKPoint.Distance(point, selectedPoint) < 0.1)
+                    if (point == selectedPoint)
                     {
-                        size = PointSize + 20;
+                        size = SelectedPointSize;
                     }
                     canvas.DrawPoint(point, entry.Color, size, PointMode);
                 }
@@ -196,8 +200,17 @@ namespace Microcharts
                                 var text = entry.ValueLabel;
                                 paint.MeasureText(text, ref bounds);
 
-                                canvas.RotateDegrees(90);
-                                canvas.Translate(Margin, -point.X + (bounds.Height / 2));
+                                if (ValueLabelRotation)
+                                {
+                                    canvas.RotateDegrees(90);
+                                    canvas.Translate(Margin, -point.X + (bounds.Height / 2));
+                                }
+                                else
+                                {
+                                    canvas.Translate(point.X - (bounds.Width / 2),
+                                        point.Y - (SelectedPointSize / 2));
+                                }
+
 
                                 canvas.DrawText(text, 0, 0, paint);
                             }

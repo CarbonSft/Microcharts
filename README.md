@@ -1,68 +1,113 @@
-# Microcharts
+# Extended Microcharts
 
-**Microcharts** is an extremely simple charting library for a wide range of platforms (see *Compatibility* section below), with shared code and rendering for all of them!
+This work is based on [Microcharts](https://github.com/aloisdeniel/Microcharts) by [Aloïs Deniel](http://aloisdeniel.github.io)
+
+## Compatibility
+
+This work is a charting library targeting **Xamarin.Forms**, **Xamarin.iOS** and **Xamarin.Android** platforms and extending capabilities of its predecessor. 
+New features include:
+* support for multiple series on one graph for `PointChart` and `LineChart`
+* displaying value labels (horizontally instead of vertically) just above data points
+* selecting (by changing its size) the nearest data point from location of user's tapping
 
 ## Gallery
  
-![gallery](Documentation/images/Gallery.png)
+![New feature](Documentation/images/multiple_series.png)
+![Inherited cool stuff](Documentation/images/Gallery.png)
 
-## Install
-
-Available on NuGet
-
-**NET Standard 1.4, Xamarin.iOS, Xamarin.Android, UWP**
-
-[![NuGet](https://img.shields.io/nuget/v/Microcharts.svg?label=NuGet)](https://www.nuget.org/packages/Microcharts/)
-
-
-**Xamarin.Forms (.NET Standard 1.4)**
-
-[![NuGet](https://img.shields.io/nuget/v/Microcharts.Forms.svg?label=NuGet)](https://www.nuget.org/packages/Microcharts.Forms/)
+## Limitations
+* all series have to have the same labels (for x-axis) 
+* number of entries (points) in each series must be equal
 
 ## Quickstart
 
 ### 1°) Your chart will need a set of data entries.
 
 ```csharp
-var entries = new[]
+var testData1 = new[]
 {
-    new Entry(200)
-    {
-        Label = "January",
-        ValueLabel = "200",
-	FillColor = SKColor.Parse("#266489")
-    },
-    new Entry(400)
-    {
-	Label = "February",
-	ValueLabel = "400",
-	FillColor = SKColor.Parse("#68B9C0")
-    },
-    new Entry(-100)
-    {
-	Label = "March",
-	ValueLabel = "-100",
-	FillColor = SKColor.Parse("#90D585")
-    }
+	new Entry(10)
+	{
+		Label = "one",
+		ValueLabel = "10",
+		Color = SKColor.Parse("#266489")
+	},
+	new Entry(20)
+	{
+		Label = "two",
+		ValueLabel = "20",
+		Color = SKColor.Parse("#68B9C0")
+	},
+	new Entry(0)
+	{
+		Label = "tree",
+		ValueLabel = "0",
+		Color = SKColor.Parse("#90D585")
+	}
 };
+
+var testData2 = new[]
+{
+	new Entry(5)
+	{
+		Label = "one",
+		ValueLabel = "5",
+		Color = new SKColor(255, 0, 0)
+	},
+	new Entry(5)
+	{
+		Label = "two",
+		ValueLabel = "5",
+		Color = new SKColor(255, 0, 0)
+	},
+	new Entry(5)
+	{
+		Label = "tree",
+		ValueLabel = "5",
+		Color = new SKColor(255, 0, 0)
+	}
+};
+
+var testData3 = new[]
+{
+	new Entry(0)
+	{
+		Label = "one",
+		ValueLabel = "0",
+		Color = new SKColor(0, 0, 255)
+	},
+	new Entry(7)
+	{
+		Label = "two",
+		ValueLabel = "7",
+		Color = new SKColor(0, 0, 255)
+	},
+	new Entry(20)
+	{
+		Label = "tree",
+		ValueLabel = "20",
+		Color = new SKColor(0, 0, 255)
+	}
+};
+
 ```
 
 ### 2°) Instanciate a chart from those entries
 
 ```csharp
-var chart = new BarChart() { Entries = entries };
-// or: var chart = new PointChart() { Entries = entries };
-// or: var chart = new LineChart() { Entries = entries };
-// or: var chart = new DonutChart() { Entries = entries };
-// or: var chart = new RadialGaugeChart() { Entries = entries };
-// or: var chart = new RadarChart() { Entries = entries };
+Chart = new LineChart()
+{
+	PointMode = PointMode.Circle,
+	Series = new List<List<Entry>>() {testData1.ToList(), testData2.ToList(), testData3.ToList()},
+	PointAreaAlpha = 128,
+	ValueLabelRotation = false,
+	LabelTextSize = 28
+};
 ```
 
 ### 2°) Add it to your UI!
 
 **Xamarin.iOS**
-
-![ios-screen](Documentation/images/iOS-Screenshot.png)
 
 ```csharp
 public override void ViewDidLoad()
@@ -84,8 +129,6 @@ public override void ViewDidLoad()
 ```
 
 **Xamarin.Android**
-
-![android-screen](Documentation/images/Android-Screenshot.png)
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -119,38 +162,6 @@ protected override void OnCreate(Bundle savedInstanceState)
 }
 ```
 
-**UWP (Windows 10)**
-
-![uwp-screen](Documentation/images/UWP-Screenshot.PNG)
-
-```xml
-<Page
-    x:Class="Microcharts.Samples.Uwp.MainPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Microcharts.Samples.Uwp"
-    xmlns:microcharts="using:Microcharts.Uwp"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
-
-    <microcharts:ChartView x:Name="chartView" />
-
-</Page>
-```
-
-```csharp
-public MainPage()
-{
-    this.InitializeComponent();
-
-    var entries = // ... see 1°) above
-    var chart = // ... see 2°) above
-
-    this.chartView.Chart = chart;
-}
-```
-
 **Xamarin.Forms**
 
 ```xml
@@ -178,44 +189,11 @@ protected override void OnAppearing()
 }
 ```
 
-**Xamarin.macOS**
-
-```csharp
-public override void ViewDidLoad()
-{
-	base.ViewDidLoad();
-
-	var entries = // ... see 1°) above
-	var chart = // ... see 2°) above
-
-	var chartView = new ChartView
-	{
-       Frame = this.View.Bounds,
-       AutoresizingMask = NSViewResizingMask.WidthSizable | NSViewResizingMask.HeightSizable,
-		Chart = chart,
-	};
-
-	this.View.AddSubview(chartView);
-}
-```
-
-## Tutorials
-
-* [Video: Charts for Xamarin Forms](https://www.youtube.com/watch?v=tmymWdmf1y4) by [@HoussemDellai](https://github.com/HoussemDellai)
-
 ## Usage
 
 Available charts are `BarChart`, `PointChart`, `LineChart`, `DonutChart`, `RadialGaugeChart`, `RadarChart`. They all have several properties to tweak their rendering.
 
 Those charts have a `Draw` method for platforms that haven't built in views.
-
-## Compatibility
-
-Built in views are provided for **UWP**, **Xamarin.Forms**, **Xamarin.iOS** and **Xamarin.Android**, **Xamarin.macOS**, but any other **.NET Standard 1.4** [SkiaSharp](https://github.com/mono/SkiaSharp) supported platform is also compatible (see one of the included `ChartView` implementations for more details).
-
-## About
-
-This project is just simple drawing on top of the awesome [SkiaSharp](https://github.com/mono/SkiaSharp) library. The purpose is not to have an heavily customizable charting library. If you want so, simply fork the code, since all of this is fairly simple. Their is no interaction, nor animation at the moment.
 
 ## Contributions
 
@@ -225,7 +203,7 @@ If you want to contribute code please file an issue and create a branch off of t
 
 ## License
 
-MIT © [Aloïs Deniel](http://aloisdeniel.github.io)
+MIT
 
 If you like my content, please consider buying me a coffee. Thank you for your support!
-* [![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/JALQwKaqH)
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/JALQwKaqH)

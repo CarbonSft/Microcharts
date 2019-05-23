@@ -105,7 +105,7 @@ Chart = new LineChart()
 };
 ```
 
-### 2°) Add it to your UI!
+### 3°) Add it to your UI!
 
 **Xamarin.iOS**
 
